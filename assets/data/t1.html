@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Moonquake Map</title>
+	 <link href="/assets/styles/style.css" rel="stylesheet" />
+      <script src="https://cdn.jsdelivr.net/npm/d3-array@3.2.0/dist/d3-array.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/d3-scale@4.0.2/dist/d3-scale.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.26.5/dist/globe.gl.min.js"></script>
+
+  </head>
+
+  <body>
+	
+	
+  <div id="moon"></div>
+
+
+	
+
+		
+  <script>
+
+
+	const setData = () => {
+	
+		fetch('/assets/data/testdata.json').then(res => res.json()).then( moonquakes => {
+		let filteredData = []
+		if(year){
+			moonquakes.map((mq,i)=> {
+				if(mq.year == year){
+					filteredData.append(mq)
+				}
+			})
+		}else{
+			filteredData = moonquakes
+		}
+	  moon.labelsData(filteredData)
+	  moon.ringsData(filteredData)
+	})
+
+	}
+    const element = document.getElementById('moon');
+	let year = ""
+	//document.querySelectorAll('.left_content').forEach(item => {
+  		//item.addEventListener('click', event => {
+    		//year = event.target.textContent
+			//setData()
+  		//})
+	//})
+	
+
+	
+
+
+
+const moon = Globe()
+  	.showGraticules(false)
+	.showAtmosphere(false)
+	.globeImageUrl('/assets/images/surface.jpg')
+	.bumpImageUrl('/assets/images/bumpmap.jpg') 
+	.backgroundImageUrl('/assets/images/space.png')
+	.labelText('magnitude')
+	.labelSize(0)
+	.labelDotRadius(1)
+	.labelColor('red')
+	.ringMaxRadius(m => {
+		if(m.magnitude < 1){
+			return 2
+	  }else if( 2 > m.magnitude >= 1){
+		return 4
+	  }else{
+		return 6
+	  }
+	})
+	.ringColor(m => {
+			if(m.magnitude < 1){
+		return '#00FF00'
+	  }else if( 2 > m.magnitude >= 1){
+		return '#FFF000'
+	  }else{
+		return '#FF0000'
+	  }
+	})
+	.labelLabel(m => `
+        <div style="font-weight: 600; font-size: larger;"><b><u>${m.year}</u></b></div>
+        <div>💥 Magnitude: <i>${m.magnitude}°</i></div>
+        <div>📅 Date: <i> ${m.day}/${m.year} </i></div>
+		<div>🕒 Time: <i>${m.hour}:${m.minute}:${m.seconds}</i></div>
+        <div>🔗 Coordinates: <i>${m.lat}°N, ${m.lng}°E</i></div>
+   `)
+	
+	(element);
+
+
+
+
+	setData()
+	 
+  </script>
+  </body>
+</html>
+
+
+
+
+
+

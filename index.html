@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moonquake Map</title>
+  <link rel="icon" href="/assets/images/nasa.png" type="image/x-icon">
+  <link href="/assets/styles/style.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/d3-array@3.2.0/dist/d3-array.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-scale@4.0.2/dist/d3-scale.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.26.5/dist/globe.gl.min.js"></script>
+</head>
+
+<body>
+  <div id="moon"></div>
+  <div class="container">
+    <br><button id="showButton" class="shower">👁️<br><div class="dov" style="color: #fff; font-size: x-small;"><u>View Menu</u></div></button>
+    <div class="inner">
+      <label for="dataset" style="text-align: center;"><b>Which Data You Want to Visualise:</b></label><br>
+      <select name="dataset" id="dataset" style="width: auto; padding: 10px; font-size: 16px; border: 1px solid #000000; border-radius: 5px;">
+        <option value="None" style="background-color: #f5f5f500; color: #333;">Moon</option>
+		<option value="Moon" style="background-color: #f5f5f500; color: #333;">High Quality Moon</option>
+        <option value="nakamura 1979" style="background-color: #f5f5f500; color: #333;">Nakamura 1979 (Quakes)</option>
+        <option value="nakamura 1983" style="background-color: #f5f5f500; color: #333;">Nakamura 1983 (Impacts)</option>
+        <option value="nakamura 2005" style="background-color: #f5f5f500; color: #333;">Nakamura 2005 (Epicenters)</option>
+        <option value="Landers" style="background-color: #f5f5f500; color: #333;">MoonLanders Sites</option>
+        <option value="Quakes" style="background-color: #f5f5f500; color: #333;">MoonQuakes Infos</option>
+        
+      </select>   
+      <br>
+      <input id="sub" type="submit" value="Submit"
+        style="text-align: center; background-color: #050505; color: #fff; border: 2px solid #00000000; border-radius: 10px;  box-shadow: 0 0 10px #000000; padding: 10px 20px; cursor: pointer;"
+        onclick="showpts()">
+
+      <br><button id="closeButton" class="close-button">×</button>
+    </div>
+
+    
+  </div>
+  <script>
+
+    const closeButton = document.getElementById("closeButton");
+    closeButton.addEventListener("click", () => {
+      document.querySelector(".inner").style.visibility = "hidden";
+      document.querySelector(".shower").style.visibility = "visible";
+    });
+
+    const showButton = document.getElementById("showButton");
+    showButton.addEventListener("click", () => {
+      document.querySelector(".shower").style.visibility = "hidden";
+      document.querySelector(".inner").style.visibility = "visible";
+    });
+
+    const elem = document.getElementById('moon');
+    const moon = Globe()
+      .globeImageUrl('/assets/images/surface.jpg')
+      .bumpImageUrl('/assets/images/bumpmap.jpg')
+      .backgroundImageUrl('/assets/images/space.png')
+      .showGraticules(false)
+      .showAtmosphere(false)
+      (elem);
+
+    ;
+
+    function showpts() {
+      a = document.getElementById("dataset").value;
+      console.log(a);
+      if (a == "nakamura 1979") {
+        const colorScale = d3.scaleOrdinal(['black']);
+
+
+        const elem = document.getElementById('moon');
+
+
+        const moon = Globe()
+          .globeImageUrl('/assets/images/surface.jpg')
+          .bumpImageUrl('/assets/images/bumpmap.jpg')
+          .backgroundImageUrl('/assets/images/space.png')
+          .showGraticules(true)
+          .showAtmosphere(false) 
+          .labelText('label')
+          .labelSize(1.7)
+          .labelDotRadius(0.7)
+          //.labelDotOrientation(d => labelsTopOrientation.has(d.label) ? 'top' : 'bottom')
+          .labelColor(d => colorScale(d.lng))
+          .labelLabel(d => `
+            <div><b>💥 Magnitude: ${d.Magnitude}</b><br></div>
+            <div><b>🔗 Coordinates: <i>${d.lat}°N, ${d.lng}°E</i></b></div>
+            <div><p>📌 This scale of moonquake <br> on earth might ${d.state}</div></p>
+            
+          `)
+          .onLabelClick(d => window.open(d.url, '_blank'))
+          (elem);
+
+        fetch('/assets/data/NAKAMURA_1979.json').then(r => r.json()).then(landingSites => {
+          moon.labelsData(landingSites);
+        });
+
+
+      }
+      else if (a == "nakamura 2005") {
+
+
+        const colorScale = d3.scaleOrdinal(['black']);
+
+
+        const elem = document.getElementById('moon');
+        const moon = Globe()
+          .globeImageUrl('/assets/images/surface.jpg')
+          .bumpImageUrl('/assets/images/bumpmap.jpg')
+          .backgroundImageUrl('/assets/images/space.png')
+          .showGraticules(true)
+          .showAtmosphere(false)
+          .labelText('label')
+          .labelSize(1.7)
+          .labelDotRadius(0.7)
+          //.labelDotOrientation(d => labelsTopOrientation.has(d.label) ? 'top' : 'bottom')
+          .labelColor(d => colorScale(d.lng))
+          .labelLabel(d => `
+            <div><p><u>The following is the depth<br>ofthe epicenter <br>of the moonquake</u></p></div>
+			<div><b>🧭 Side of the Moon: ${d.Side}</b><br></div>
+            <div><b>⏬ Depth of Epicenter: ${d.Depth}km</b><br></div>
+            <div><b>🔗 Coordinates: <i>${d.lat}°N, ${d.lng}°E</i><b></div>
+          
+            
+          `)
+          .onLabelClick(d => window.open(d.url, '_blank'))
+          (elem);
+
+        fetch('/assets/data/nakamura_2005.json').then(r => r.json()).then(landingSite => {
+          moon.labelsData(landingSite);
+        });
+
+      }
+      else if (a == "nakamura 1983") {
+        const colorScale = d3.scaleOrdinal(['black']);
+        const labelTopOrientation = new Set(['13 S-IVB', '14 LM', '15 S-IVB']);
+        const elem = document.getElementById('moon');
+        const moon = Globe()
+          .globeImageUrl('/assets/images/surface.jpg')
+          .bumpImageUrl('/assets/images/bumpmap.jpg')
+          .backgroundImageUrl('/assets/images/space.png')
+          .showGraticules(true)
+          .showAtmosphere(false) 
+          .labelText('AI')
+          .labelSize(1.7)
+          .labelDotRadius(1)
+          .labelDotOrientation(d => labelTopOrientation.has(d.AI) ? 'top' : 'bottom')
+          .labelColor("black")
+          .labelLabel(d => `
+            <div><p>This is the date<br>of impact of spacecarft<br>on the lunar surface:</p>
+			<div><b>📅 Impact Date: <i> ${d.JD}/${d.Y} </i></b></div>
+  			<div><b>🕒 Impact Time: <i>${d.Hour}:${d.Min}:${d.Sec}</i></b></div>
+            <div><b>🔗 Coordinates: <i>${d.lat}°N, ${d.lng}°E</i></b></div>
+            <div>Year: 
+            
+          `)
+          .onLabelClick(d => window.open(d.url, '_blank'))
+          (elem);
+
+        fetch('/assets/data/nakamura_1983.json').then(r => r.json()).then(landingSite => {
+          moon.labelsData(landingSite);
+        });
+      } else if (a == "Landers") {
+
+
+        const colorScale = d3.scaleOrdinal(['black']);
+
+        const labelsTopOrientation = new Set(['Apollo 12', 'Luna 2', 'Luna 20', 'Luna 21', 'Luna 24', 'LCROSS Probe']);
+
+        const elem = document.getElementById('moon');
+        const moon = Globe()
+          .globeImageUrl('/assets/images/surface.jpg')
+          .bumpImageUrl('/assets/images/bumpmap.jpg')
+          .backgroundImageUrl('/assets/images/space.png')
+          .showGraticules(true)
+          .showAtmosphere(false)
+          .labelText('label')
+          .labelSize(2.2)
+          .labelDotRadius(0.7)
+          .labelDotOrientation(d => labelsTopOrientation.has(d.label) ? 'top' : 'bottom')
+          .labelColor(d => colorScale(d.agency))
+          .labelLabel(d => `
+        <div style="font-weight: 600; font-size: larger;"><b><u>${d.label}</u></b></div>
+        <div>🚀 ${d.agency} - ${d.program} Program</div>
+        <div>📍 &nbsp; Landing on <i>${new Date(d.date).toLocaleDateString()}</i></div>
+        <div>🔗 Coordinates: <i>${d.lat}°N, ${d.lng}°E</i></div>
+   `)
+          .onLabelClick(d => window.open(d.url, '_blank'))
+          (elem);
+
+        fetch('/assets/data/landings.json').then(r => r.json()).then(landingSites => {
+          moon.labelsData(landingSites);
+        });
+
+      }else if (a == "Quakes") {
+
+
+        const setData = () => {
+	
+  fetch('/assets/data/quakes.json').then(res => res.json()).then( moonquakes => {
+  let filteredData = []
+  if(year){
+    moonquakes.map((mq,i)=> {
+      if(mq.year == year){
+        filteredData.append(mq)
+      }
+    })
+  }else{
+    filteredData = moonquakes
+  }
+  moon.labelsData(filteredData)
+  moon.ringsData(filteredData)
+})
+
+}
+  const element = document.getElementById('moon');
+let year = ""
+//document.querySelectorAll('.left_content').forEach(item => {
+    //item.addEventListener('click', event => {
+      //year = event.target.textContent
+    //setData()
+    //})
+//})
+
+
+
+
+
+
+const moon = Globe()
+  .showGraticules(true)
+.showAtmosphere(false)
+.globeImageUrl('/assets/images/surface.jpg')
+.bumpImageUrl('/assets/images/bumpmap.jpg') 
+.backgroundImageUrl('/assets/images/space.png')
+.labelText('magnitude')
+.labelSize(0)
+.labelDotRadius(1)
+.labelColor('red')
+.ringMaxRadius(m => {
+  if(m.magnitude < 1){
+    return 2
+  }else if( 2 > m.magnitude >= 1){
+  return 4
+  }else{
+  return 6
+  }
+})
+.ringColor(m => {
+    if(m.magnitude < 1){
+  return '#00FF00'
+  }else if( 2 > m.magnitude >= 1){
+  return '#FFF000'
+  }else{
+  return '#FF0000'
+  }
+})
+.labelLabel(m => `
+      <div style="font-weight: 600; font-size: larger;"><b><u>${m.year}</u></b></div>
+      <div>💥 Magnitude: <i>${m.magnitude}°</i></div>
+      <div>📅 Date: <i> ${m.day}/${m.year} </i></div>
+  	  <div>🕒 Time: <i>${m.hour}:${m.minute}:${m.seconds}</i></div>
+      <div>🔗 Coordinates: <i>${m.lat}°N, ${m.lng}°E</i></div>
+ `)
+
+(element);
+
+
+
+
+setData()
+} else if (a == "Moon")  {
+
+        const elem = document.getElementById('moon');
+        const moon = Globe()
+          .globeImageUrl('https://s3-us-west-2.amazonaws.com/s.cdpn.io/17271/lroc_color_poles_1k.jpg')
+          .bumpImageUrl('/assets/images/ldem_3_8bit.jpg')
+          .backgroundImageUrl('https://s3-us-west-2.amazonaws.com/s.cdpn.io/17271/hipp8_s.jpg')
+          .showGraticules(false)
+          .showAtmosphere(true)
+          (elem);
+
+        ;
+		setData()
+      }else   {
+
+const elem = document.getElementById('moon');
+const moon = Globe()
+  .globeImageUrl('/assets/images/surface.jpg')
+  .bumpImageUrl('/assets/images/bumpmap.jpg')
+  .backgroundImageUrl('/assets/images/space.png')
+  .showGraticules(false)
+  .showAtmosphere(false)
+  (elem);
+
+;
+setData()
+}
+}
+
+
+  </script>
+
+</body>
+
+</html>
