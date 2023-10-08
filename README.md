@@ -1,4 +1,4 @@
-# MoonMap (Https://MoonMap.surge.sh)
+# MoonMap (https://MoonMap.surge.sh)
 
 
 🌕🚀 Introducing "MoonMap" 🌕🚀
@@ -13,4 +13,4 @@ The best part? The size of these mesmerizing pressure waves is dynamically calcu
 
 So, join us on a lunar journey like no other and immerse yourself in the wonders of "MoonMap" Explore the Moon's seismic secrets with a touch of interactivity and a dash of cosmic charm! 🌌🌟🌖
 
-try it on Https://MoonMap.surge.sh
+try it on https://MoonMap.surge.sh
